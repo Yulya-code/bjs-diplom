@@ -1,7 +1,5 @@
 'use strict';
 
-const { response } = require("express");
-
 //Log Out
 const logoutButton = new LogoutButton();
 
@@ -9,9 +7,9 @@ logoutButton.action = () => {
 ApiConnector.logout(response =>  {
     if (response.success) {
         location.reload();
-    }
-})
-}
+    };
+});
+};
 
 //Current User
 
@@ -34,40 +32,49 @@ const exchangeRates = () => {
     })
 }
     exchangeRates();
-    setInterval(exchangeRates(), 60000);
+    setInterval(exchangeRates, 60000);
 
 //Money Manager
+//Пополнение счета
 
 const moneyManager = new MoneyManager();
 
-moneyManager.addMoneyCallback = (data) => {
-    ApiConnector.addMoney(data, (response) => {
-      if (response.success) {
-        showProfile(response.data) && setMessage(isSuccess);
-      } else {
-      setMessage('Баланс не пополнен');
-    }
-})
+const serverResponse = (response, message) => {
+  if (response.success) {
+      moneyManager.setMessage(isSuccess, 'Счет успешно пополнен');
+      ProfileWidget.showProfile(response.data);
+  } else {
+    moneyManager.setMessage('Не удалось пополнить счет');
+  }
 }
 
+moneyManager.addMoneyCallback = (data) => {
+    ApiConnector.addMoney(data, (response) => {
+      serverResponse(response.success);
+    })
+};
+
+//Конвертация
 moneyManager.conversionMoneyCallback = (data) => {
     ApiConnector.convertMoney(data, (response) => {
       if (response.success) {
-         showProfile(response.data) && setMessage(isSuccess);
+        moneyManager.setMessage(isSuccess, 'Конверсия выполнена успешно');
+        ProfileWidget.showProfile(response.data);
        } else {
-       setMessage('Конверсия не осуществлена');
+        moneyManager.setMessage('Не удалось конвертировать валюту. Попробуйте еще раз');
      } 
 })
 }
-
+//Перевод валюты
 moneyManager.sendMoneyCallback = (data) => {
     ApiConnector.transferMoney(data, (response) => {
         if (response.success) {
-            showProfile(response.data) && setMessage(isSuccess);
+          moneyManager.setMessage(isSuccess, 'Перевод валюты выполнен успешно');
+          ProfileWidget.showProfile(response.data);
           } else {
-          setMessage('Валюта не переведена');
-        }    
-    })
+          moneyManager.setMessage('Не удалось осуществить перевод. Попробуйте еще раз');
+    }    
+})
 }
 
 //Favorites Widget
@@ -78,7 +85,7 @@ ApiConnector.getFavorites(response => {
     if (response.success) {
         favoritesWidget.clearTable();
         favoritesWidget.fillTable(response.data);
-        favoritesWidget.updateUsersList(response.data);
+        moneyManager.updateUsersList(response.data);
     }
 })
 
