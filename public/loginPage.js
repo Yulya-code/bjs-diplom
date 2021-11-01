@@ -18,6 +18,6 @@ ApiConnector.login(data, (response) => {
 
 userForm.registerFormCallback = (data) => {
 ApiConnector.register(data, (response) => {
-  funcCallback(response, userForm.setRegisterErrorMessage);
+  callBackFunction(response, userForm.setRegisterErrorMessage);
 });
 }

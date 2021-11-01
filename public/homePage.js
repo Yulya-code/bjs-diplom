@@ -41,16 +41,16 @@ const moneyManager = new MoneyManager();
 
 const serverResponse = (response, message) => {
   if (response.success) {
-      moneyManager.setMessage(isSuccess, 'Счет успешно пополнен');
+      moneyManager.setMessage (true, 'Счет успешно пополнен');
       ProfileWidget.showProfile(response.data);
   } else {
-    moneyManager.setMessage('Не удалось пополнить счет');
+    moneyManager.setMessage(false, 'Произошла ошибка');
   }
 }
 
 moneyManager.addMoneyCallback = (data) => {
     ApiConnector.addMoney(data, (response) => {
-      serverResponse(response.success);
+      serverResponse(response.success, 'Счет успешно пополнен');
     })
 };
 
