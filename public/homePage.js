@@ -4,7 +4,7 @@
 const logoutButton = new LogoutButton();
 
 logoutButton.action = () => {
-ApiConnector.logout(response =>  {
+ApiConnector.logout((response) =>  {
     if (response.success) {
         location.reload();
     };
@@ -13,7 +13,7 @@ ApiConnector.logout(response =>  {
 
 //Current User
 
-ApiConnector.current (response => {
+ApiConnector.current ((response) => {
     if (response.success) {
         ProfileWidget.showProfile(response.data)
     }
@@ -24,7 +24,7 @@ ApiConnector.current (response => {
 const ratesBoard = new RatesBoard();
 
 const exchangeRates = () => {
-    ApiConnector.getStocks (response => {
+    ApiConnector.getStocks((response) => {
         if (response.success) {
             ratesBoard.clearTable();
             ratesBoard.fillTable(response.data);
@@ -39,18 +39,14 @@ const exchangeRates = () => {
 
 const moneyManager = new MoneyManager();
 
-const serverResponse = (response, message) => {
-  if (response.success) {
-      moneyManager.setMessage (true, 'Счет успешно пополнен');
-      ProfileWidget.showProfile(response.data);
-  } else {
-    moneyManager.setMessage(false, 'Произошла ошибка');
-  }
-}
-
 moneyManager.addMoneyCallback = (data) => {
     ApiConnector.addMoney(data, (response) => {
-      serverResponse(response.success, 'Счет успешно пополнен');
+      if (response.success) {
+        moneyManager.setMessage (true, 'Счет успешно пополнен');
+        ProfileWidget.showProfile(response.data);
+        } else {
+          moneyManager.setMessage(false, 'Произошла ошибка');
+        }
     })
 };
 
@@ -58,10 +54,10 @@ moneyManager.addMoneyCallback = (data) => {
 moneyManager.conversionMoneyCallback = (data) => {
     ApiConnector.convertMoney(data, (response) => {
       if (response.success) {
-        moneyManager.setMessage(isSuccess, 'Конверсия выполнена успешно');
+        moneyManager.setMessage(true, 'Конверсия выполнена успешно');
         ProfileWidget.showProfile(response.data);
        } else {
-        moneyManager.setMessage('Не удалось конвертировать валюту. Попробуйте еще раз');
+        moneyManager.setMessage(false, 'Не удалось конвертировать валюту. Проверьте правильность операции');
      } 
 })
 }
@@ -69,10 +65,10 @@ moneyManager.conversionMoneyCallback = (data) => {
 moneyManager.sendMoneyCallback = (data) => {
     ApiConnector.transferMoney(data, (response) => {
         if (response.success) {
-          moneyManager.setMessage(isSuccess, 'Перевод валюты выполнен успешно');
+          moneyManager.setMessage(true, 'Перевод валюты выполнен успешно');
           ProfileWidget.showProfile(response.data);
           } else {
-          moneyManager.setMessage('Не удалось осуществить перевод. Попробуйте еще раз');
+          moneyManager.setMessage(false, 'Не удалось осуществить перевод. Проверьте правильность операции');
     }    
 })
 }
@@ -81,7 +77,7 @@ moneyManager.sendMoneyCallback = (data) => {
 
 const favoritesWidget = new FavoritesWidget();
 
-ApiConnector.getFavorites(response => {
+ApiConnector.getFavorites((response) => {
     if (response.success) {
         favoritesWidget.clearTable();
         favoritesWidget.fillTable(response.data);
@@ -94,10 +90,10 @@ favoritesWidget.addUserCallback = (data) => {
     if (response.success) {
         favoritesWidget.clearTable();
         favoritesWidget.fillTable(response.data);
-        favoritesWidget.updateUsersList(response.data);
-        setMessage(isSuccess)
+        moneyManager.updateUsersList(response.data);
+        moneyManager.setMessage(true, 'Пользователь успешно добавлен')
     } else {
-        setMessage('Пользователь не добавлен в список избранных');
+        moneyManager.setMessage(false, 'Пользователь не найден');
     }
     })
 }
@@ -107,11 +103,10 @@ favoritesWidget.removeUserCallback = (data) => {
         if (response.success) {
             favoritesWidget.clearTable();
             favoritesWidget.fillTable(response.data);
-            favoritesWidget.updateUsersList(response.data);
-            setMessage(isSuccess)
+            moneyManager.updateUsersList(response.data);
+            moneyManager.setMessage(true, 'Пользователь удален')
         } else {
-            setMessage('Пользователь не удален');
+            moneyManager.setMessage(false, 'Удаляемый пользователь не найден');
         }
-        })
-        
+        })       
 }
